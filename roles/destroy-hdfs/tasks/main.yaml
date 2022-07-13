@@ -1,0 +1,28 @@
+- name: remove hdfs tar.gz and home file
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+   - '{{ hdfs_unarchive_destination }}{{ hdfs_unarchived_filename }}.tar.gz'
+   - '{{ hdfs_hadoop_home }}'
+  tags: [ remove_dir_hdfs, remove_hdfs ]
+
+- name: remove unused hosts from host file
+  template:
+    src: hosts.jinja2
+    dest: /etc/hosts
+    mode: 0640
+  tags: [ remove_hosts_file, remove_hdfs ]
+
+- name: remove dns
+  lineinfile:
+      path: /etc/resolv.conf
+      line: 'nameserver {{ dns_server }}'
+      state: absent
+  tags: [ remove_dns ]
+
+- name: check fuser installation
+  apt:
+    name: [psmisc, openjdk-8-jdk]
+    state: absent
+  tags: [ remove_apt ]

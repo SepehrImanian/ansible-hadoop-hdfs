@@ -1,0 +1,15 @@
+- name: create journalnode service
+  template:
+    src: hdfs-journalnode.service.j2
+    dest: /etc/systemd/system/hdfs-journalnode.service
+    mode: 0640
+  notify:
+   - daemon reload
+   - journalnode start
+  tags: [ add_service_journalnode ]
+
+- name: enable service hdfs-journalnode.service
+  systemd:
+    name: hdfs-journalnode.service
+    enabled: yes
+  tags: [ enable_journalnode_service ]

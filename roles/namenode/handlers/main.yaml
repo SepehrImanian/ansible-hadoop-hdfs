@@ -1,0 +1,16 @@
+- name: daemon reload
+  systemd:
+    daemon_reload: yes
+  tags: [ daemon_reload ]
+
+- name: zkfc start
+  systemd: 
+    state: started
+    name: hdfs-zkfc.service
+  tags: [ start_zkfc_service ]
+
+- name: namenode start
+  systemd: 
+    state: started
+    name: hdfs-namenode.service
+  tags: [ start_namenode_service ]

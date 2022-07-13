@@ -1,0 +1,27 @@
+- name: delete directories
+  file:
+    state: absent
+    path: '{{ hdfs_dfs_datanode_data_dir }}'
+  tags: [ datanode_dir ]
+
+- name: create directories
+  file:
+    path: '{{ hdfs_dfs_datanode_data_dir }}'
+    state: directory
+  tags: [ datanode_dir ]
+
+- name: create datanode service
+  template:
+    src: hdfs-datanode.service.j2
+    dest: /etc/systemd/system/hdfs-datanode.service
+    mode: 0640
+  notify:
+   - daemon reload
+   - datanode start
+  tags: [ add_service_datanode ]
+
+- name: enable service hdfs-datanode.service
+  systemd:
+    name: hdfs-datanode.service
+    enabled: yes
+  tags: [ enable_datanode_service ]

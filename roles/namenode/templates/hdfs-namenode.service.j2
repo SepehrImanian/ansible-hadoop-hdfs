@@ -1,0 +1,14 @@
+[Unit]
+Description=Hadoop DFS namenode and datanode
+After=syslog.target network.target remote-fs.target nss-lookup.target network-online.target
+Requires=network-online.target
+
+[Service]
+ExecStart=/opt/hadoop/bin/hdfs --daemon start namenode
+ExecStop=/opt/hadoop/bin/hdfs --daemon stop namenode
+Restart=on-failure
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+Wants=hdfs-zkfc.service

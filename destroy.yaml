@@ -1,0 +1,6 @@
+- name: destroy-hdfs
+  hosts: all
+  become: true
+  become_user: root
+  roles:
+    - destroy-hdfs

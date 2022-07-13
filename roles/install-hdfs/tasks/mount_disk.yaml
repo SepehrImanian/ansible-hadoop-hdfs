@@ -1,0 +1,21 @@
+---
+
+- name: Create filesystem on disk
+  filesystem:
+    fstype: '{{filesystem}}'
+    dev: '{{disk}}'
+  tags: [ extenal_disk ]
+
+- name: mounting the disk
+  mount:
+    path: '{{destination}}'
+    src: '{{disk}}'
+    fstype: '{{filesystem}}'
+    state: mounted
+  tags: [ extenal_disk ]
+
+- name: configuring the ownership
+  file:
+    path: '{{destination}}'
+    state: directory
+  tags: [ extenal_disk ]

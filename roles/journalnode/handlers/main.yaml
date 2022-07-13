@@ -1,0 +1,10 @@
+- name: daemon reload
+  systemd:
+    daemon_reload: yes
+  tags: [ daemon_reload ]
+
+- name: journalnode start
+  systemd: 
+    state: started
+    name: hdfs-journalnode.service
+  tags: [ start_journalnode_service ]

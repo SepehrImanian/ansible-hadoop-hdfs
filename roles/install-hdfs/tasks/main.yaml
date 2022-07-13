@@ -1,0 +1,129 @@
+- name: check if file exists
+  stat:
+    path: '{{hdfs_download_destination}}'
+  register: stat_result
+  tags: [ download_hdfs ]
+
+- name: add dns
+  lineinfile:
+      path: /etc/resolv.conf
+      line: 'nameserver {{ dns_server }}'
+      insertbefore: 'nameserver 127.0.0.53'
+  when: allow_dns == true
+  tags: [ dns, add_dns ]
+
+- name: remove dns
+  lineinfile:
+      path: /etc/resolv.conf
+      line: 'nameserver {{ dns_server }}'
+      state: absent
+  when: allow_dns == false
+  tags: [ dns, remove_dns ]
+
+- name: download apache hadoop
+  get_url:
+    url: '{{hdfs_download_link}}'
+    dest: '{{hdfs_download_destination}}'
+  when: not stat_result.stat.exists
+  tags: [ download_hdfs ]
+
+- name: unarchive downloaded file
+  unarchive:
+    src: '{{hdfs_download_destination}}'
+    dest: '{{hdfs_unarchive_destination}}'
+    remote_src: yes
+  tags: [ download_hdfs ]
+
+- name: remove similar directory
+  file:
+    path: '{{hdfs_unarchive_destination}}hadoop'
+    state: absent
+  tags: [ download_hdfs ]
+
+- name: change directory name
+  command:
+    cmd: "mv -f {{hdfs_unarchive_destination}}{{hdfs_unarchived_filename}} {{hdfs_unarchive_destination}}hadoop"
+  tags: [ download_hdfs ]
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+  tags: [ disable_swap ]
+
+- name: Disable swap
+  command: swapoff -a
+  tags: [ disable_swap ]
+
+- name: adding external disk
+  import_tasks: mount_disk.yaml
+  when: allow_disk_mount == true
+  tags: [ add_extenal_disk ]
+
+- name: create core-site.xml
+  template:
+    src: core-site.xml.jinja2
+    dest: "{{hdfs_hadoop_home}}/etc/hadoop/core-site.xml"
+    mode: 0640
+  tags: [ add_templates ]
+
+- name: create hadoop-env.sh
+  template:
+    src: hadoop-env.sh.jinja2
+    dest: "{{hdfs_hadoop_home}}/etc/hadoop/hadoop-env.sh"
+    mode: 0640
+  tags: [ add_templates ]
+
+- name: create namenode hdfs-site.xml
+  template:
+    src: hdfs-site-namenode.xml.j2
+    dest: "{{hdfs_hadoop_home}}/etc/hadoop/hdfs-site.xml"
+    mode: 0640
+  when: (ansible_default_ipv4.address in groups['activenamenodeserver']) or (ansible_default_ipv4.address in groups['standbynamenodeservers'])
+  tags: [ add_templates ]
+
+- name: create datanode hdfs-site.xml
+  template:
+    src: hdfs-site-datanode.xml.j2
+    dest: "{{hdfs_hadoop_home}}/etc/hadoop/hdfs-site.xml"
+    mode: 0640
+  when: (ansible_default_ipv4.address in groups['datanodeservers'])
+  tags: [ add_templates ]
+
+- name: create workers
+  template:
+    src: workers.jinja2
+    dest: "{{hdfs_hadoop_home}}/etc/hadoop/workers"
+    mode: 0640
+  tags: [ add_templates ]
+
+- name: add hadoop to path
+  shell:
+    cmd: 'echo PATH={{hdfs_hadoop_home}}/bin:{{hdfs_hadoop_home}}/sbin:$PATH >> ~/.profile'
+  tags: [ path ]
+
+- name: create hosts file
+  template:
+    src: hosts.jinja2
+    dest: /etc/hosts
+    mode: 0640
+  tags: [ hosts_file ]
+
+- name: check ssh key existence
+  stat:
+    path: '$HOME/.ssh/id_rsa'
+  register: ssh_stat_result
+  tags: [ ssh ]
+
+- name: create ssh keys
+  command:
+    cmd: 'ssh-keygen -t rsa -C $HOSTNAME -f $HOME/.ssh/id_rsa -P ""'
+  when: not ssh_stat_result.stat.exists
+  tags: [ ssh ]
+
+- name: check fuser installation
+  apt:
+    name: [psmisc, openjdk-8-jdk]
+    state: present
+  tags: [ apt ]

@@ -1,0 +1,10 @@
+- name: daemon reload
+  systemd:
+    daemon_reload: yes
+  tags: [ daemon_reload ]
+
+- name: datanode start
+  systemd: 
+    state: started
+    name: hdfs-datanode.service
+  tags: [ start_datanode_service ]

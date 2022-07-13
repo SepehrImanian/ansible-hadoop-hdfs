@@ -1,0 +1,66 @@
+- name: delete directories
+  file:
+    path: '{{ hdfs_dfs_namenode_name_dir }}'
+    state: absent
+  tags: [ namenode_dir ]
+
+- name: create directories
+  file:
+    path: '{{ hdfs_dfs_namenode_name_dir }}'
+    state: directory
+  tags: [ namenode_dir ]
+
+- name: copy namenode public key to datanodes
+  local_action: "shell ssh root@{{ ansible_default_ipv4.address }} 'cat ~/.ssh/id_rsa.pub' | ssh root@{{item}}  'cat >> ~/.ssh/authorized_keys'"
+  with_items: "{{ groups['datanodeservers'] }}"
+  tags: [ namenode_ssh ]
+
+- name: create zkfc service
+  template:
+    src: hdfs-zkfc.service.j2
+    dest: /etc/systemd/system/hdfs-zkfc.service
+    mode: 0640
+  notify:
+   - daemon reload
+   - zkfc start
+  tags: [ add_service_zkfc ]
+
+- name: create namenode service
+  template:
+    src: hdfs-namenode.service.j2
+    dest: /etc/systemd/system/hdfs-namenode.service
+    mode: 0640
+  notify:
+   - daemon reload
+   - namenode start
+  tags: [ add_service_namenode ]
+
+- name: format filesystem
+  shell:
+    cmd: 'yes | {{hdfs_hadoop_home}}/bin/hdfs namenode -format -force'
+  when: "'activenamenodeserver' in group_names"
+
+- name: format zkfc in namenodes
+  shell:
+    cmd: 'yes | {{hdfs_hadoop_home}}/bin/hdfs zkfc -formatZK -force'
+  ignore_errors: yes
+
+- name: start cluster
+  command:
+    cmd: '{{hdfs_hadoop_home}}/sbin/start-dfs.sh'
+  when: "'activenamenodeserver' in group_names"
+
+- name: copy meta data to standby namenodes
+  shell:
+    cmd: 'yes | {{hdfs_hadoop_home}}/bin/hdfs namenode -bootstrapStandby -force'
+  when: "'standbynamenodeservers' in group_names"
+
+- name: stop cluster
+  command:
+    cmd: '{{hdfs_hadoop_home}}/sbin/stop-dfs.sh'
+  when: "'activenamenodeserver' in group_names"
+
+- name: start cluster
+  command:
+    cmd: '{{hdfs_hadoop_home}}/sbin/start-dfs.sh'
+  when: "'activenamenodeserver' in group_names"

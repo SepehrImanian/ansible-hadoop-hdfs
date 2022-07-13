@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>{{ hdfs_dfs_replication }}</value>
+    </property>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>{{ hdfs_dfs_namenode_name_dir }}</value>
+    </property>
+    <property>
+        <name>dfs.nameservices</name>
+        <value>{{ hdfs_dfs_nameservices }}</value>
+    </property>
+    <property>
+        <name>dfs.ha.namenodes.{{ hdfs_dfs_nameservices }}</name>
+        <value>{% for host in groups['namenodeservers'] %}{{ hostvars[host]['name'] }},{% endfor %}</value>
+    </property>
+
+    {% for host in groups['namenodeservers'] %}
+        <property>
+            <name>dfs.namenode.rpc-address.{{ hdfs_dfs_nameservices }}.{{ hostvars[host]['name'] }}</name>
+            <value>{{ host }}:{{ hostvars[host]['rpc_port'] }}</value>
+        </property>
+        <property>
+            <name>dfs.namenode.http-address.{{ hdfs_dfs_nameservices }}.{{ hostvars[host]['name'] }}</name>
+            <value>{{ host }}:{{ hostvars[host]['http_port'] }}</value>
+        </property>
+    {% endfor %}
+    {% if hdfs_dfs_namenode_datanode_registration_ip_hostname_check %}
+    <property>
+        <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+        <value>{{ hdfs_dfs_namenode_datanode_registration_ip_hostname_check }}</value>
+    </property>
+    {% endif %}
+
+
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://{{ groups['qjournalnodeservers']|join(":8485;") }}:8485/{{ hdfs_dfs_nameservices }}</value>
+    </property>
+
+    <property>
+        <name>dfs.client.failover.proxy.provider.{{ hdfs_dfs_nameservices }}</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>{{ hdfs_ha_automatic_failover_enabled }}</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>{{ hdfs_dfs_ha_fencing_methods }}</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>{{ hdfs_dfs_ha_fencing_ssh_private_key_files }}</value>
+    </property>
+
+</configuration>
