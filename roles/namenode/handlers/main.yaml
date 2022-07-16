@@ -14,3 +14,15 @@
     state: started
     name: hdfs-namenode.service
   tags: [ start_namenode_service ]
+
+- name: zkfc restart
+  systemd: 
+    state: restarted
+    name: hdfs-zkfc.service
+  tags: [ start_zkfc_service ]
+
+- name: namenode restart
+  systemd: 
+    state: restarted
+    name: hdfs-namenode.service
+  tags: [ start_namenode_service ]

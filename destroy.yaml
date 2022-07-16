@@ -2,5 +2,6 @@
   hosts: all
   become: true
   become_user: root
+  strategy: linear
   roles:
     - destroy-hdfs

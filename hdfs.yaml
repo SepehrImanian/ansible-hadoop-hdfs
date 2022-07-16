@@ -1,6 +1,25 @@
 - name: install-hdfs
   hosts: all
   become: true
+  strategy: linear
   become_user: root
   roles:
     - install-hdfs
+
+- name: start journalnodes
+  hosts: qjournalnodeservers
+  strategy: linear
+  roles:
+    - journalnode
+
+- name: start datanodes
+  hosts: datanodeservers
+  strategy: linear
+  roles:
+    - datanode
+
+- name: start namenodes
+  hosts: namenodeservers
+  strategy: linear
+  roles:
+    - namenode

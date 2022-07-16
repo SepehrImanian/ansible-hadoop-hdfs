@@ -1,34 +1,70 @@
-- name: stop services and disable services
-  systemd:
-    name: "{{ item }}"
-    state: stopped
-    enabled: no
-  with_items:
-   - hdfs-zkfc.service
-   - hdfs-namenode.service
-   - hdfs-datanode.service
-   - hdfs-journalnode.service
-  ignore_errors: yes
-  tags: [ remove_services ]
+- block:
+    - name: stop namenode services and disable namenode services
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      with_items:
+      - hdfs-zkfc.service
+      - hdfs-namenode.service
+      when: (ansible_default_ipv4.address in groups['namenodeservers'])
+      tags: [ remove_services ]
 
-- name: remove all services
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-   - /etc/systemd/system/hdfs-zkfc.service
-   - /etc/systemd/system/hdfs-namenode.service
-   - /etc/systemd/system/hdfs-datanode.service
-   - /etc/systemd/system/hdfs-journalnode.service
+    - name: remove namenode services
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+      - /etc/systemd/system/hdfs-zkfc.service
+      - /etc/systemd/system/hdfs-namenode.service
+      when: (ansible_default_ipv4.address in groups['namenodeservers'])
+      tags: [ remove_services_file ]
+
+    - name: stop datanode services and disable datanode services
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      with_items:
+      - hdfs-datanode.service
+      when: (ansible_default_ipv4.address in groups['datanodeservers'])
+      tags: [ remove_services ]
+
+    - name: remove datanode services
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+      - /etc/systemd/system/hdfs-datanode.service
+      when: (ansible_default_ipv4.address in groups['datanodeservers'])
+      tags: [ remove_services_file ]
+
+    - name: stop journalnode services and disable journalnode services
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      with_items:
+      - hdfs-journalnode.service
+      when: (ansible_default_ipv4.address in groups['qjournalnodeservers'])
+      tags: [ remove_services ]
+
+    - name: remove journalnode services
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+      - /etc/systemd/system/hdfs-journalnode.service
+      when: (ansible_default_ipv4.address in groups['qjournalnodeservers'])
+      tags: [ remove_services_file ]
   ignore_errors: yes
-  tags: [ remove_services_file ]
 
 - name: remove hdfs tar.gz and home file
   file:
     path: "{{ item }}"
     state: absent
   with_items:
-   - '{{ hdfs_unarchive_destination }}{{ hdfs_unarchived_filename }}.tar.gz'
+  #  - '{{ hdfs_unarchive_destination }}{{ hdfs_unarchived_filename }}.tar.gz'
    - '{{ hdfs_hadoop_home }}'
   tags: [ remove_dir_hdfs, remove_hdfs ]
 
@@ -48,6 +84,6 @@
 
 - name: check fuser installation
   apt:
-    name: [psmisc, openjdk-8-jdk]
+    name: [ psmisc ]
     state: absent
   tags: [ remove_apt ]
