@@ -57,6 +57,11 @@
         <value>qjournal://{{ groups['qjournalnodeservers']|join(":8485;") }}:8485/{{ hdfs_dfs_nameservices }}</value>
     </property>
 
+	<property>
+		<name>dfs.journalnode.edits.dir</name>
+		<value>{{ hdfs_dfs_journalnode_edits_dir }}</value>
+	</property>
+
     <property>
         <name>dfs.client.failover.proxy.provider.{{ hdfs_dfs_nameservices }}</name>
         <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>

@@ -6,12 +6,14 @@
 - name: zkfc start
   systemd: 
     state: started
+    enabled: yes
     name: hdfs-zkfc.service
   tags: [ start_zkfc_service ]
 
 - name: namenode start
   systemd: 
     state: started
+    enabled: yes
     name: hdfs-namenode.service
   tags: [ start_namenode_service ]
 

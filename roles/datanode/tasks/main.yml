@@ -18,10 +18,5 @@
   notify:
    - daemon reload
    - datanode start
+   - datanode enable
   tags: [ add_service_datanode ]
-
-- name: enable service hdfs-datanode.service
-  systemd:
-    name: hdfs-datanode.service
-    enabled: yes
-  tags: [ enable_datanode_service ]

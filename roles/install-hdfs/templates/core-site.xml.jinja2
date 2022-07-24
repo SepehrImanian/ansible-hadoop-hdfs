@@ -29,11 +29,6 @@
 	</property>
     {% endif %}
 
-
-	<property>
-		<name>dfs.journalnode.edits.dir</name>
-		<value>{{ hdfs_dfs_journalnode_edits_dir }}</value>
-	</property>
     <property>
         <name>ha.zookeeper.quorum</name>
         <value>{% for zk_host in hdfs_ha_zookeeper_quorum %}{{zk_host}},{% endfor %} </value>

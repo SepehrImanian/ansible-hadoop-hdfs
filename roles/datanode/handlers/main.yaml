@@ -8,3 +8,9 @@
     state: started
     name: hdfs-datanode.service
   tags: [ start_datanode_service ]
+
+- name: datanode enable
+  systemd:
+    name: hdfs-datanode.service
+    enabled: yes
+  tags: [ enable_datanode_service ]

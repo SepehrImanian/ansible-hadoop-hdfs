@@ -66,6 +66,7 @@
   with_items:
   #  - '{{ hdfs_unarchive_destination }}{{ hdfs_unarchived_filename }}.tar.gz'
    - '{{ hdfs_hadoop_home }}'
+   - '/var/lib/hadoop'
   tags: [ remove_dir_hdfs, remove_hdfs ]
 
 - name: remove unused hosts from host file

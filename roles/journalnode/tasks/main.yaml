@@ -1,3 +1,15 @@
+- name: delete directories
+  file:
+    path: '{{ hdfs_dfs_journalnode_edits_dir }}/{{ hdfs_fs_defaultFS }}'
+    state: absent
+  tags: [ journalnode_dir ]
+
+- name: create directories
+  file:
+    path: '{{ hdfs_dfs_journalnode_edits_dir }}/{{ hdfs_fs_defaultFS }}'
+    state: directory
+  tags: [ journalnode_dir ]
+
 - name: create journalnode service
   template:
     src: hdfs-journalnode.service.j2
@@ -5,11 +17,6 @@
     mode: 0640
   notify:
    - daemon reload
-   - journalnode start
+   - journalnode restart
+   - journalnode enable
   tags: [ add_service_journalnode ]
-
-- name: enable service hdfs-journalnode.service
-  systemd:
-    name: hdfs-journalnode.service
-    enabled: yes
-  tags: [ enable_journalnode_service ]

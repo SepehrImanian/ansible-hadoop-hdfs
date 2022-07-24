@@ -3,8 +3,14 @@
     daemon_reload: yes
   tags: [ daemon_reload ]
 
-- name: journalnode start
+- name: journalnode restart
   systemd: 
-    state: started
+    state: restarted
     name: hdfs-journalnode.service
   tags: [ start_journalnode_service ]
+
+- name: journalnode enable
+  systemd:
+    name: hdfs-journalnode.service
+    enabled: yes
+  tags: [ enable_journalnode_service ]

@@ -18,16 +18,30 @@
 - name: format zkfc in namenodes
   shell:
     cmd: 'yes | {{hdfs_hadoop_home}}/bin/hdfs zkfc -formatZK -force'
-  async: 60
+  async: 500
   ignore_errors: yes
   tags: [ format_zkfc, format]
 
+- name: wait ports be ready for journalnode
+  wait_for:
+    port: "{{ item }}"
+    delay: 10
+  with_items:
+    - 8485
+    - 8480
+  tags: [ wait_port ]
+
 - name: format filesystem
   shell:
-    cmd: 'yes | {{hdfs_hadoop_home}}/bin/hdfs namenode -format -force'
-  async: 60
+    cmd: 'Y | {{hdfs_hadoop_home}}/bin/hdfs namenode -format {{ hdfs_fs_defaultFS }}'
   when: "'activenamenodeserver' in group_names"
+  register: format_filesystem_result
+  failed_when: "'FAILED' in format_filesystem_result.stderr"
+  async: 500
   tags: [ format_namenode, format]
+
+- debug:
+    msg: '{{ format_filesystem_result }}'
 
 - name: create zkfc service
   template:
@@ -47,16 +61,30 @@
   notify:
    - daemon reload
    - namenode start
+   - namenode restart
   when: "'activenamenodeserver' in group_names"
   tags: [ add_service_namenode ]
+
+- name: wait ports be ready after activenamenodeserver
+  wait_for:
+    host: '{{ ansible_default_ipv4.address }}'
+    port: 9000
+    delay: 10
+  when: "'activenamenodeserver' in group_names"
+  tags: [ wait_port ]
 
 - name: copy meta data to standby namenodes
   shell:
     cmd: 'yes | {{hdfs_hadoop_home}}/bin/hdfs namenode -bootstrapStandby -force'
-  async: 90
   ignore_errors: yes
   when: "'standbynamenodeservers' in group_names"
+  register: copy_metadata_standbynamenodes
+  failed_when: "'FAILED' in copy_metadata_standbynamenodes.stderr"
+  async: 500
   tags: [ cp_metedata_standbynamenode ]
+
+- debug:
+    msg: '{{ copy_metadata_standbynamenodes }}'
 
 - name: create namenode service for standbynamenodeservers
   template:
@@ -69,3 +97,19 @@
    - namenode start
   when: "'standbynamenodeservers' in group_names"
   tags: [ add_service_namenode ]
+
+- name: namenode restart
+  systemd: 
+    state: restarted
+    name: hdfs-namenode.service
+  tags: [ start_namenode_service ]
+
+- name: wait ports be ready after standbynamenodeservers
+  wait_for:
+    host: '{{ ansible_default_ipv4.address }}'
+    port: "{{ item }}"
+    delay: 10
+  with_items:
+    - 9000
+  when: "'standbynamenodeservers' in group_names"
+  tags: [ wait_port ]
