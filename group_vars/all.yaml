@@ -1,6 +1,6 @@
 # installation vars
 hdfs_unarchived_filename: "hadoop-3.3.3"
-hdfs_download_link: "https://downloads.apache.org/hadoop/common/stable/{{hdfs_unarchived_filename}}.tar.gz"
+hdfs_download_link: "https://downloads.apache.org/hadoop/common/{{hdfs_unarchived_filename}}/{{hdfs_unarchived_filename}}.tar.gz"
 hdfs_download_sha_sum: "9ac5a5a8d29de4d2edfb5e554c178b04863375c5644d6fea1f6464ab4a7e22a50a6c43253ea348edbd114fc534dcde5bdd2826007e24b2a6b0ce0d704c5b4f5b"
 hdfs_download_destination: "/opt/{{hdfs_unarchived_filename}}.tar.gz"
 hdfs_unarchive_destination: "/opt/"
@@ -57,5 +57,5 @@ allow_disk_mount: false
 
 # dns
 
-dns_server: 91.240.202.239
+dns_server: 172.16.21.128
 allow_dns: true
