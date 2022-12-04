@@ -61,9 +61,19 @@
   notify:
    - daemon reload
    - namenode start
-   - namenode restart
   when: "'activenamenodeserver' in group_names"
   tags: [ add_service_namenode ]
+
+- name: namenode and zkfs start check
+  systemd:
+    state: started
+    enabled: yes
+    name: "{{ item }}"
+  when: "'activenamenodeserver' in group_names"
+  with_items:
+    - 'hdfs-namenode.service'
+    - 'hdfs-zkfc.service'
+  tags: [ start_check_service ]
 
 - name: wait ports be ready after activenamenodeserver
   wait_for:
@@ -98,11 +108,16 @@
   when: "'standbynamenodeservers' in group_names"
   tags: [ add_service_namenode ]
 
-- name: namenode restart
-  systemd: 
-    state: restarted
-    name: hdfs-namenode.service
-  tags: [ start_namenode_service ]
+- name: namenode and zkfs start check
+  systemd:
+    state: started
+    enabled: yes
+    name: "{{ item }}"
+  when: "'standbynamenodeservers' in group_names"
+  with_items:
+    - 'hdfs-namenode.service'
+    - 'hdfs-zkfc.service'
+  tags: [ start_check_service ]
 
 - name: wait ports be ready after standbynamenodeservers
   wait_for:

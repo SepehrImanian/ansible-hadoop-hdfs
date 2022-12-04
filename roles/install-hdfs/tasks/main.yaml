@@ -122,6 +122,12 @@
   when: not ssh_stat_result.stat.exists
   tags: [ ssh ]
 
+- name: Update and upgrade apt packages
+  apt:
+    upgrade: yes
+    update_cache: yes
+  tags: [ apt ]
+
 - name: check fuser installation
   apt:
     name: [psmisc, openjdk-8-jdk]
