@@ -17,9 +17,9 @@ hdfs_fs_defaultFS: "ha-cluster"
 hdfs_trash_interval: 1440
 hdfs_dfs_journalnode_edits_dir: "/var/lib/hadoop/journal"
 hdfs_ha_zookeeper_quorum:
-  - "172.16.21.125:49162"
-  - "172.16.21.125:49163"
-  - "172.16.21.125:49164"
+  - "10.100.177.5:49162"
+  - "10.100.177.5:49163"
+  - "10.100.177.5:49164"
 ```
 
 ### File hadoop-env.sh Vars
@@ -65,7 +65,7 @@ allow_disk_mount: false
 ### Dns Vars
 
 ```yaml
-dns_server: 172.16.21.128
+dns_server: 10.100.177.10
 allow_dns: true
 ```
 
@@ -75,28 +75,28 @@ allow_dns: true
 
 ```ini
 [activenamenodeserver]
-172.16.21.125 name=n1 rpc_port=9000 http_port=9870
+10.100.177.1 name=n1 rpc_port=9000 http_port=9870
 
 [standbynamenodeservers]
-172.16.21.127 name=n2 rpc_port=9000 http_port=9870
+10.100.177.2 name=n2 rpc_port=9000 http_port=9870
 
 [namenodeservers:children]
 activenamenodeserver
 standbynamenodeservers
 
 [datanodeservers]
-172.16.21.128 name=n3
-172.16.21.129 name=n4
+10.100.177.3 name=n3
+10.100.177.4 name=n4
 
 [qjournalnodeservers]
-172.16.21.125
-172.16.21.127
-172.16.21.128
+10.100.177.1
+10.100.177.2
+10.100.177.3
 
 [all:vars]
 ansible_user=root
 ansible_connection=ssh
-ansible_ssh_port=22
+ansible_ssh_port=2299
 ```
 
 ### Installation
