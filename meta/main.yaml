@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  role_name: ansible-hadoop-hdfs
+  author: Sepehr Imanian
+  description: Ansible Playbook For Setup Hadoop HDFS
+  min_ansible_version: 2.13.6
+  license: Apache License 2.0
+  platforms:
+    - name: Ubuntu
+      versions:
+        - 20.04
+	- 18.04
+  galaxy_tags:
+    - hadoop-hdfs
+    - hadoop
+    - hdfs
+    - apache-hadoop
+    - apache-hadoop-hdfs
+dependencies: []
