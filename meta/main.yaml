@@ -9,7 +9,7 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - 20.04
-	- 18.04
+        - 18.04
   galaxy_tags:
     - hadoop-hdfs
     - hadoop
